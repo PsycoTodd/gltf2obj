@@ -6,4 +6,20 @@ gltf2obj does not deal with image since the input is treated as that the texture
 
 remember to get draco in this directory by **git clone https://github.com/google/draco.git**
 
+cd to draco folder.
 
+```console
+$ mkdir build_dir && cd build_dir
+$ cmake ../
+```
+
+Then go to gltf2obj folder
+
+
+```console
+$ mkdir build_dir && cd build_dir
+$ cmake ../
+$ cmake --build .
+```
+
+Then you should get the executable gltf2obj. Pass the gltf file Path and output dir to it, it will generate the corresponding obj model.

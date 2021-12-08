@@ -8,6 +8,14 @@
 #include <iostream>
 #include <string>
 
+bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
+                                std::string *, int, int,
+                                const unsigned char *, int,
+                                void *user_pointer)
+{
+  return true;
+}
+
 int main(int argc, char *argv[])
 {
   if(argc < 2) {
@@ -19,10 +27,15 @@ int main(int argc, char *argv[])
   tinygltf::TinyGLTF loader;
   std::string err, warn;
 
-  bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1])
+  loader.SetImageLoader(dummyLoadImageDataFunction, nullptr);
+  bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1]);
+  
 
   if(ret) {
     std::cout<<model.extensionsUsed[0]<<std::endl;
+  }
+  else {
+    std::cout<<err<<std::endl;
   }
   
 }

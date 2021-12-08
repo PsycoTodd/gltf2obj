@@ -8,6 +8,9 @@ set(CMAKE_CXX+EXTENSIONS OFF)
 
 project(gltf2obj)
 
-include_directories("draco/src")
+include_directories("draco/build_dir")
+include_directories("draco/src/")
+link_directories("draco/build_dir")
 
 add_executable(${PROJECT_NAME} gltf2obj/main.cpp)
+target_link_libraries(${PROJECT_NAME} libdraco.a)
