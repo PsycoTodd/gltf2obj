@@ -7,6 +7,7 @@
 #include "tiny_gltf.h"
 #include <iostream>
 #include <string>
+#include "gltf2obj.h"
 
 bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
                                 std::string *, int, int,
@@ -29,7 +30,10 @@ int main(int argc, char *argv[])
 
   loader.SetImageLoader(dummyLoadImageDataFunction, nullptr);
   bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1]);
-  
+
+  using namespace gaic;
+  vector<Vertex> meshdata;
+  gltf2obj::loadGLTFGeometry(model, meshdata);
 
   if(ret) {
     std::cout<<model.extensionsUsed[0]<<std::endl;
