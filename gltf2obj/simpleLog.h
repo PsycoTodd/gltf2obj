@@ -1,7 +1,11 @@
+#ifndef GAIC_SIMPLE_LOG_H
+#define GAIC_SIMPLE_LOG_H
+
 #include <iostream>
 
 namespace gaic
 {
+
 enum class log_level : char
 {
   Info = 'I',
@@ -10,6 +14,7 @@ enum class log_level : char
 };
 
 void log(log_level const level,
-         std::string_view const message,
-         std::source_location const source = std::source_location const source = std::source_location::current());
+         const std::string&  message);
 }
+
+#endif

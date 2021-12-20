@@ -7,7 +7,7 @@ namespace gaic
 
 int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model, vector<Vertex>& meshData)
 {
-  
+  return 0;
 }
 
 int gltf2obj::loadGLTFMaterial(const tinygltf::Model& model, vector<Material>& materialData)

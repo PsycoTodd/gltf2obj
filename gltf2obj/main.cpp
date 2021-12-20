@@ -40,10 +40,10 @@ int main(int argc, char *argv[])
   gltf2obj::loadGLTFGeometry(model, meshdata);
 
   if(ret) {
-    log(log_level::Info, model.extensionsUsed[0] + "Ilkjlkj");
+    log(log_level::Info, model.extensionsUsed[0]);
   }
   else {
-    log(log_leve::Error, err);
+    log(log_level::Error, err);
   }
   
 }

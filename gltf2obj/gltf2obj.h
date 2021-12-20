@@ -1,3 +1,6 @@
+#ifndef GAIC_GLTF2OBJ
+#define GAIC_GLTF2OBJ
+
 #include <vector>
 
 namespace tinygltf
@@ -30,3 +33,5 @@ public:
 };
 
 }
+
+#endif
