@@ -5,9 +5,9 @@
 #define TINYGLTF_NO_INCLUDE_STB_IMAGE_WRITE
 #define TINYGLTF_ENABLE_DRACO
 #include "tiny_gltf.h"
-#include <iostream>
 #include <string>
 #include "gltf2obj.h"
+#include "simpleLog.h"
 
 bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
                                 std::string *, int, int,
@@ -31,15 +31,19 @@ int main(int argc, char *argv[])
   loader.SetImageLoader(dummyLoadImageDataFunction, nullptr);
   bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1]);
 
+  if(!err.empty()) {
+
+  }
+
   using namespace gaic;
   vector<Vertex> meshdata;
   gltf2obj::loadGLTFGeometry(model, meshdata);
 
   if(ret) {
-    std::cout<<model.extensionsUsed[0]<<std::endl;
+    log(log_level::Info, model.extensionsUsed[0] + "Ilkjlkj");
   }
   else {
-    std::cout<<err<<std::endl;
+    log(log_leve::Error, err);
   }
   
 }
