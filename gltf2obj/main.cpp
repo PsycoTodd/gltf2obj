@@ -9,6 +9,8 @@
 #include "gltf2obj.h"
 #include "simpleLog.h"
 
+using namespace gaic;
+
 bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
                                 std::string *, int, int,
                                 const unsigned char *, int,
@@ -32,12 +34,13 @@ int main(int argc, char *argv[])
   bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1]);
 
   if(!err.empty()) {
-
+    log(log_level::Error, err);
   }
 
   using namespace gaic;
   vector<Vertex> meshdata;
-  gltf2obj::loadGLTFGeometry(model, meshdata);
+  vector<size_t> indexdata;
+  gltf2obj::loadGLTFGeometry(model, meshdata, indexdata);
 
   if(ret) {
     log(log_level::Info, model.extensionsUsed[0]);
