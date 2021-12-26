@@ -2,11 +2,15 @@
 #include "tiny_gltf.h"
 #include "simpleLog.h"
 
+#include <sstream>
+
 
 namespace gaic
 {
 
-int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model, vector<Vertex>& meshData, vector<size_t>& indexData)
+int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model, 
+                               vector<Vertex>& meshData, 
+                               vector<size_t>& indexData)
 {
   // load the scene first.
   int total_vert = 0;
@@ -129,10 +133,60 @@ int gltf2obj::loadGLTFMaterial(const tinygltf::Model& model, vector<Material>& m
   return 0;
 }
 
-string gltf2obj::generateObjFromMeshData(vector<Vertex>& meshData)
+string gltf2obj::generateObjFromMeshData(const vector<Vertex>& meshData, 
+                                         const vector<size_t>& indexData, 
+                                         const std::string& fileNameKey)
 {
+  // based on the obj definition, we can only get all vertex smeshed into one continus list.
+  std::ostringstream objStr;
+  char buffer[125];
+  // build the head part.
+  objStr <<"# converted by gltf2obj"<<std::endl
+         << "# Produced by Dimensional Imaging OBJ exporter"<<std::endl
+         << "# http://www.di3d.com" <<std::endl
+         << "#" << std::endl
+         << "# units mm" << std::endl
+         << "#" << std::endl
+         << "mtllib " << fileNameKey << ".mtl" << std::endl
+         << "# Object0 follows..." << std::endl;
 
-  return "";
+  // Write the vertices
+  for(const auto& v : meshData) 
+  {
+    sprintf(buffer, "v %.6f %.6f %.6f\n", v.position[0], v.position[1], v.position[2]);
+    objStr << buffer;
+  }
+  objStr << "# " << meshData.size() << " vertices" << std::endl << std::endl;
+
+  // Write the texcoords
+  for(const auto& v : meshData) 
+  {
+    sprintf(buffer, "vt %.6f %.6f\n", v.texCoord[0], 1.0 - v.texCoord[1]);
+    objStr << buffer;
+  }
+  objStr << "# " << meshData.size() << " texture vertices" << std::endl << std::endl;
+
+  // Write the vertex normals
+  for(const auto& v : meshData) 
+  {
+    sprintf(buffer, "vn %.6f %.6f %.6f\n", v.normal[0], v.normal[1], v.normal[2]);
+    objStr << buffer;
+  }
+  objStr << "# " << meshData.size() << " normals" << std::endl << std::endl;
+  
+  // Now give the triangle info
+  objStr << "g " << fileNameKey << std::endl
+         << "usemtl " << fileNameKey << std::endl;
+  
+  for(int i = 0; i < indexData.size(); i += 3)
+  {
+    size_t i1 = indexData[i+0] + 1, i2 = indexData[i+1] + 1, i3 = indexData[i+2] + 1;
+    sprintf(buffer, "f %lu/%lu/%lu %lu/%lu/%lu %lu/%lu/%lu\n", i1, i1, i1, i2, i2, i2, i3, i3, i3);
+    objStr << buffer;
+  }
+  objStr << "# " << indexData.size() / 3 << " triangles" << std::endl;
+
+  return objStr.str();
 }
 
 }

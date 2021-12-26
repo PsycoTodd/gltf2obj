@@ -6,6 +6,7 @@
 #define TINYGLTF_ENABLE_DRACO
 #include "tiny_gltf.h"
 #include <string>
+#include <fstream>
 #include "gltf2obj.h"
 #include "simpleLog.h"
 
@@ -22,7 +23,7 @@ bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
 int main(int argc, char *argv[])
 {
   if(argc < 2) {
-    std::cout<<"Please provide the input gltf file path."<<std::endl;
+    std::cout<<"Please provide the input/output gltf file path."<<std::endl;
     return -1;
   }
 
@@ -30,23 +31,32 @@ int main(int argc, char *argv[])
   tinygltf::TinyGLTF loader;
   std::string err, warn;
 
+  // Get the output file path and key
+  std::string outputPath(argv[2]);
+
+  std::string filename = outputPath.substr(outputPath.find_last_of("/\\") + 1);
+  std::string fileKey = filename.substr(0, filename.find('.'));
+
   loader.SetImageLoader(dummyLoadImageDataFunction, nullptr);
   bool ret = loader.LoadASCIIFromFile(&model, &err, &warn, argv[1]);
 
   if(!err.empty()) {
     log(log_level::Error, err);
+    return -1;
   }
 
   using namespace gaic;
   vector<Vertex> meshdata;
   vector<size_t> indexdata;
   gltf2obj::loadGLTFGeometry(model, meshdata, indexdata);
+  std::string objStr = gltf2obj::generateObjFromMeshData(meshdata, indexdata, fileKey);
 
-  if(ret) {
-    log(log_level::Info, model.extensionsUsed[0]);
+  if(!objStr.empty())
+  {
+    ofstream out(outputPath);
+    out << objStr;
+    out.close();
   }
-  else {
-    log(log_level::Error, err);
-  }
-  
+
+  return 0;
 }
