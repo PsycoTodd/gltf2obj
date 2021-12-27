@@ -49,7 +49,16 @@ int main(int argc, char *argv[])
   vector<Vertex> meshdata;
   vector<size_t> indexdata;
   gltf2obj::loadGLTFGeometry(model, meshdata, indexdata);
-  std::string objStr = gltf2obj::generateObjFromMeshData(meshdata, indexdata, fileKey);
+
+  // create the necessary prefix string
+  std::ostringstream objStrStream;
+  objStrStream <<"# converted by gltf2obj"<<std::endl
+               << "# Produced by Dimensional Imaging OBJ exporter"<<std::endl
+               << "# http://www.di3d.com" <<std::endl
+               << "#" << std::endl
+               << "# units mm" << std::endl;
+
+  std::string objStr = gltf2obj::generateObjFromMeshData(meshdata, indexdata, objStrStream.str(), fileKey);
 
   if(!objStr.empty())
   {

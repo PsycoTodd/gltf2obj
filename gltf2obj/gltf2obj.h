@@ -31,7 +31,7 @@ class gltf2obj
 public:
   static int loadGLTFGeometry(const tinygltf::Model& model, vector<Vertex>& meshData, vector<size_t>& indexData);
   static int loadGLTFMaterial(const tinygltf::Model& model, vector<Material>& materialData);
-  static string generateObjFromMeshData(const vector<Vertex>& meshData, const vector<size_t>& indexData, const std::string& fileNameKey);
+  static string generateObjFromMeshData(const vector<Vertex>& meshData, const vector<size_t>& indexData, const std::string& prefixString, const std::string& fileNameKey);
 };
 
 }

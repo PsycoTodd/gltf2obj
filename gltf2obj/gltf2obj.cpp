@@ -67,7 +67,7 @@ int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model,
             size = 4;
             break;
           default:
-            log(log_level::Error, "No support accessor, load fail.");
+            log(log_level::Error, "No support accessor, load fails.");
             return 0;
         }
 
@@ -76,20 +76,20 @@ int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model,
         if (!it->first.compare("POSITION")) {
           for (auto k = 0; k < num_vert; ++k) {
             const void * pData = &(buffer.data.at(0)) + bufferView.byteOffset + accessor.byteOffset  + k * stride;
-            std::memcpy(meshData[k].position, pData, size * sizeof(float));
+            std::memcpy(meshData[k].position, pData, stride);
           }
         }
         else if (!it->first.compare("NORMAL")) {
           for (auto k = 0; k < num_vert; ++k) {
             const void * pData = &(buffer.data.at(0)) + bufferView.byteOffset + accessor.byteOffset  + k * stride;
-            std::memcpy(meshData[k].normal, pData, size * sizeof(float));
+            std::memcpy(meshData[k].normal, pData, stride);
           }
           containNormals = true;
         }
         else if (!it->first.compare("TEXCOORD_0")) {
           for (auto k = 0; k < num_vert; ++k) {
             const void * pData = &(buffer.data.at(0)) + bufferView.byteOffset + accessor.byteOffset  + k * stride;
-            std::memcpy(meshData[k].texCoord, pData, size * sizeof(float));
+            std::memcpy(meshData[k].texCoord, pData, stride);
           }
         }
         else {
@@ -135,18 +135,14 @@ int gltf2obj::loadGLTFMaterial(const tinygltf::Model& model, vector<Material>& m
 
 string gltf2obj::generateObjFromMeshData(const vector<Vertex>& meshData, 
                                          const vector<size_t>& indexData, 
+                                         const std::string& prefixString,
                                          const std::string& fileNameKey)
 {
   // based on the obj definition, we can only get all vertex smeshed into one continus list.
   std::ostringstream objStr;
   char buffer[125];
   // build the head part.
-  objStr <<"# converted by gltf2obj"<<std::endl
-         << "# Produced by Dimensional Imaging OBJ exporter"<<std::endl
-         << "# http://www.di3d.com" <<std::endl
-         << "#" << std::endl
-         << "# units mm" << std::endl
-         << "#" << std::endl
+  objStr << prefixString << "#" << std::endl
          << "mtllib " << fileNameKey << ".mtl" << std::endl
          << "# Object0 follows..." << std::endl;
 
