@@ -10,13 +10,14 @@ gltf2obj does not deal with image since the input is treated as that the texture
 
 remember to get draco in this directory by **git clone https://github.com/google/draco.git**
 
-## Build for Mac/Linux ##
+## Build for Mac/Linux/Windows on Comand line ##
 
 cd to draco folder.
 
-```console
+```console <> for optional relase build setting
 $ mkdir build_dir && cd build_dir
-$ cmake ../
+$ cmake .. <-DCMAKE_BUILD_TYPE=Release>
+$ cmake --build . <--config Release>
 ```
 
 Then go to gltf2obj folder
@@ -24,8 +25,8 @@ Then go to gltf2obj folder
 
 ```console
 $ mkdir build_dir && cd build_dir
-$ cmake ../
-$ cmake --build .
+$ cmake .. <-DCMAKE_BUILD_TYPE=Release>
+$ cmake --build . <--config Release>
 ```
 
 ## Build for Windows ##
@@ -37,14 +38,23 @@ Choose the build directory to be `build_dir`
 Then click configure and generate button.
 Open the project in VS2015 for example. Build for the Release or Debug version.
 
-After build complete, you should see drao.lib in build_dir/RELEASE directory.
+After build complete, you should see draco.lib in build_dir/RELEASE directory.
 
-Do the samething for the gltf2obj.
+Do the same thing for the gltf2obj.
 
 Then you should get the executable gltf2obj. Pass the gltf file Path and output dir to it, it will generate the corresponding obj model.
 
+## Usage ##
+After build complete, you can find the executables. Try to call with one gltf with separated texture images, for example
 
-# **Batch processing** #
+```shell
+gltf2obj.exe <input_gltf_path> <output_obj_path> <if_need_texture_conversion then 1 or 0>
+```
+
+In the output folder you will see diffuse image and obj file with mtl if you need texture conversion also. Right now we only convert diffuse texture.
+
+
+# **Batch processing Examples** #
 
 Please go to the `script` folder for python tools to convert between obj and gltf.
 

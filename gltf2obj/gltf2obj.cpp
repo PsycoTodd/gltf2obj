@@ -67,7 +67,7 @@ int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model,
             size = 4;
             break;
           default:
-            log(log_level::Error, "No support accessor, load fails.");
+            log(log_level::Error, "Not a supported accessor, load fails.");
             return 0;
         }
 

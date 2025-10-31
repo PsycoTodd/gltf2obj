@@ -22,7 +22,7 @@ bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
 
 int main(int argc, char *argv[])
 {
-  if(argc < 2) {
+  if(argc < 3) {
     std::cout<<"Please provide the input/output gltf file path."<<std::endl;
     return -1;
   }
@@ -33,6 +33,14 @@ int main(int argc, char *argv[])
 
   // Get the output file path and key
   std::string outputPath(argv[2]);
+
+  // Get optional 3rd argument (integer)
+  bool createTextureFlag = false;
+  if(argc >= 4) {
+    createTextureFlag = std::atoi(argv[3]) != 0;
+  }
+
+  std::cout<<createTextureFlag<<endl;
 
   std::string filename = outputPath.substr(outputPath.find_last_of("/\\") + 1);
   std::string fileKey = filename.substr(0, filename.find('.'));
