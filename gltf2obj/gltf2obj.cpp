@@ -128,9 +128,64 @@ int gltf2obj::loadGLTFGeometry(const tinygltf::Model& model,
   }
 }
 
+/*
+* Traverse the material section in gltf and store diffuse color and diffuse texture.
+* for diffuse Texture, go to textures, then images to find the corresponding file path.
+* if it is image uri as binary data, output error indicate not support for now.
+*
+*/
 int gltf2obj::loadGLTFMaterial(const tinygltf::Model& model, vector<Material>& materialData)
 {
-  return 0;
+  if(model.materials.empty()) {
+    log(log_level::Info, "No materials found in GLTF model.");
+    return 0;
+  }
+
+  materialData.resize(model.materials.size());
+
+  for(size_t i = 0; i < model.materials.size(); ++i) {
+    const tinygltf::Material& gltfMaterial = model.materials[i];
+    Material& material = materialData[i];
+
+    // Get diffuse color from baseColorFactor (PBR) or diffuseFactor (legacy)
+    if(gltfMaterial.pbrMetallicRoughness.baseColorFactor.size() >= 3) {
+      material.diffuseColor[0] = static_cast<float>(gltfMaterial.pbrMetallicRoughness.baseColorFactor[0]);
+      material.diffuseColor[1] = static_cast<float>(gltfMaterial.pbrMetallicRoughness.baseColorFactor[1]);
+      material.diffuseColor[2] = static_cast<float>(gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+    } else {
+      // Default white color
+      material.diffuseColor[0] = 1.0f;
+      material.diffuseColor[1] = 1.0f;
+      material.diffuseColor[2] = 1.0f;
+    }
+
+    // Get diffuse texture from baseColorTexture
+    int textureIndex = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
+    if(textureIndex >= 0 && textureIndex < model.textures.size()) {
+      const tinygltf::Texture& texture = model.textures[textureIndex];
+
+      if(texture.source >= 0 && texture.source < model.images.size()) {
+        const tinygltf::Image& image = model.images[texture.source];
+
+        if(!image.uri.empty()) {
+          // Store the URI as the texture path
+          material.diffuseTexture = image.uri;
+        } else {
+          // Binary data embedded - not supported
+          log(log_level::Error, "Binary embedded textures are not supported. Material: " + gltfMaterial.name);
+          material.diffuseTexture = "";
+        }
+      } else {
+        log(log_level::Warning, "Invalid image source for texture in material: " + gltfMaterial.name);
+        material.diffuseTexture = "";
+      }
+    } else {
+      // No texture assigned
+      material.diffuseTexture = "";
+    }
+  }
+
+  return static_cast<int>(materialData.size());
 }
 
 string gltf2obj::generateObjFromMeshData(const vector<Vertex>& meshData, 

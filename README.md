@@ -4,6 +4,13 @@ This is a cpp tool that convert certain gltf model to obj. This is ideal for mod
 This package depends on tiny-gltf to load the draco compressed gltf file.
 gltf2obj does not deal with image since the input is treated as that the textures are separated.
 
+## TODO Checklist ##
+
+- [ ] Support multiple materials' diffuse texture
+- [ ] Support multiple texture types (currently only diffuse)
+- [ ] Add unit tests for geometry conversion
+- [ ] Support binary GLTF (.glb) format
+
 # **Build process** #
 
 ## Get draco source ##

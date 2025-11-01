@@ -23,7 +23,8 @@ struct Vertex
 
 struct Material
 {
-  float diffuse[3];
+  float diffuseColor[3];
+  string diffuseTexture;
 };
 
 class gltf2obj

@@ -7,10 +7,59 @@
 #include "tiny_gltf.h"
 #include <string>
 #include <fstream>
+#include <iostream>
 #include "gltf2obj.h"
 #include "simpleLog.h"
 
 using namespace gaic;
+
+// Helper function to get directory from path
+std::string getDirectory(const std::string& filepath) {
+  size_t pos = filepath.find_last_of("/\\");
+  if(pos != std::string::npos) {
+    return filepath.substr(0, pos);
+  }
+  return "";
+}
+
+// Helper function to get filename from path
+std::string getFilename(const std::string& filepath) {
+  size_t pos = filepath.find_last_of("/\\");
+  if(pos != std::string::npos) {
+    return filepath.substr(pos + 1);
+  }
+  return filepath;
+}
+
+// Helper function to get filename without extension
+std::string getFilenameWithoutExtension(const std::string& filepath) {
+  std::string filename = getFilename(filepath);
+  size_t pos = filename.find_last_of('.');
+  if(pos != std::string::npos) {
+    return filename.substr(0, pos);
+  }
+  return filename;
+}
+
+// Helper function to copy file
+bool copyFile(const std::string& source, const std::string& dest) {
+  std::ifstream src(source, std::ios::binary);
+  if(!src.is_open()) {
+    return false;
+  }
+
+  std::ofstream dst(dest, std::ios::binary);
+  if(!dst.is_open()) {
+    src.close();
+    return false;
+  }
+
+  dst << src.rdbuf();
+
+  src.close();
+  dst.close();
+  return true;
+}
 
 bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
                                 std::string *, int, int,
@@ -18,6 +67,66 @@ bool dummyLoadImageDataFunction(tinygltf::Image *, const int, std::string *,
                                 void *user_pointer)
 {
   return true;
+}
+
+// Function to create MTL file and copy texture
+void createObjMtl(const Material& material, const std::string& inputGltfPath, const std::string& mtlPath)
+{
+  // Get the directory of the input GLTF file
+  std::string inputDir = getDirectory(inputGltfPath);
+
+  // Get the directory of the output MTL file
+  std::string outputDir = getDirectory(mtlPath);
+
+  // Create MTL file
+  std::ofstream mtlFile(mtlPath);
+  if(!mtlFile.is_open()) {
+    log(log_level::Error, "Failed to create MTL file: " + mtlPath);
+    return;
+  }
+
+  // Extract material name from mtl path (without extension)
+  std::string materialName = getFilenameWithoutExtension(mtlPath);
+
+  // Write MTL content
+  mtlFile << "newmtl " << materialName << std::endl;
+  mtlFile << "Kd " << material.diffuseColor[0] << " "
+          << material.diffuseColor[1] << " "
+          << material.diffuseColor[2] << std::endl;
+
+  // Handle texture if it exists
+  if(!material.diffuseTexture.empty()) {
+    std::string textureFilename = getFilename(material.diffuseTexture);
+
+    // Source texture path (relative to input GLTF)
+    std::string sourceTexture;
+    if(inputDir.empty()) {
+      sourceTexture = material.diffuseTexture;
+    } else {
+      sourceTexture = inputDir + "/" + material.diffuseTexture;
+    }
+
+    // Destination texture path (same directory as MTL file)
+    std::string destTexture;
+    if(outputDir.empty()) {
+      destTexture = textureFilename;
+    } else {
+      destTexture = outputDir + "/" + textureFilename;
+    }
+
+    // Copy the texture file
+    if(copyFile(sourceTexture, destTexture)) {
+      log(log_level::Info, "Copied texture: " + sourceTexture + " to " + destTexture);
+    } else {
+      log(log_level::Warning, "Failed to copy texture file: " + sourceTexture);
+    }
+
+    // Write texture reference in MTL file
+    mtlFile << "map_Kd " << textureFilename << std::endl;
+  }
+
+  mtlFile.close();
+  log(log_level::Info, "Created MTL file: " + mtlPath);
 }
 
 int main(int argc, char *argv[])
@@ -39,8 +148,6 @@ int main(int argc, char *argv[])
   if(argc >= 4) {
     createTextureFlag = std::atoi(argv[3]) != 0;
   }
-
-  std::cout<<createTextureFlag<<endl;
 
   std::string filename = outputPath.substr(outputPath.find_last_of("/\\") + 1);
   std::string fileKey = filename.substr(0, filename.find('.'));
@@ -73,6 +180,18 @@ int main(int argc, char *argv[])
     ofstream out(outputPath);
     out << objStr;
     out.close();
+  }
+
+  // work on diffuse texture if needed.
+  if (createTextureFlag) {
+    using namespace gaic;
+    vector<Material> materialdata;
+    gltf2obj::loadGLTFMaterial(model, materialdata);
+    // right now just output first one.
+    if (!materialdata.empty()) {
+      std::string mtlPath = outputPath.substr(0, outputPath.rfind('.')) + ".mtl";
+      createObjMtl(materialdata[0], argv[1], mtlPath);
+    }
   }
 
   return 0;
